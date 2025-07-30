@@ -680,7 +680,7 @@ elif  selected == "Feedback / Query Form":
                    )'''
                    )
     conn.commit()
-    conn.close()
+   
 
 
 
@@ -697,19 +697,23 @@ elif  selected == "Feedback / Query Form":
             cursor.execute("INSERT INTO form(name,email,feedback_type,message,submitted_on)VALUES(?,?,?,?,?)",
                            (name,email,feedback_type, message,datetime.now()))
             conn.commit()
+            st.success("✅ Thank you! Your feedback has been submitted.")
+        else:
+            st.warning("⚠️ Please fill all fields before submitting.")
+
 
             # View feedback section
-   # with st.expander("🔍 View Submitted Feedback"):
-   #     conn.execute("SELECT name, email, feedback_type, message, submitted_on FROM form ORDER BY submitted_on DESC")
-   #     rows = cursor.fetchall()
-    #    if rows:
-           # for row in rows:
-               # st.write(f"**{row[0]} ({row[2]})** — *{row[1]}*")
-               # st.write(f"> {row[3]}")
-              #  st.caption(f"🕒 Submitted on {row[4]}")
-               # st.markdown("---")
-        #else:
-            #st.info("No feedback submitted yet.")
+    with st.expander("🔍 View Submitted Feedback"):
+        cursor.execute("SELECT name, email, feedback_type, message, submitted_on FROM form ORDER BY submitted_on DESC")
+        rows = cursor.fetchall()
+        if rows:
+            for row in rows:
+                st.write(f"**{row[0]} ({row[2]})** — *{row[1]}*")
+                st.write(f"> {row[3]}")
+                st.caption(f"🕒 Submitted on {row[4]}")
+                st.markdown("---")
+        else:
+            st.info("No feedback submitted yet.")
     
     
         
