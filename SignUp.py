@@ -1,6 +1,7 @@
 import streamlit as st 
 import sqlite3
 from remote_job_health_impact_dashboard import show_dashboard
+from streamlit_option_menu import option_menu
 conn = sqlite3.connect('app_users.db', check_same_thread=False)
 cursor = conn.cursor()
 def create_user_table():
@@ -80,10 +81,31 @@ def main():
         show_dashboard(st.session_state["username"])#calling dashboard
 
     else:
-        menu = st.sidebar.selectbox("Sign up/Login", ["Sign In", "Sign Up"])
-        if menu == "Sign In":
+       # menu = st.sidebar.selectbox("🔐Sign up/Login", ["Sign In", "Sign Up"])
+        with st.sidebar:
+            selected = option_menu(
+            menu_title="Signin / Signup",
+            options=["Sign In", "Sign Up"],
+            icons=["person-plus", "box-arrow-in-right"],  # Bootstrap icons
+            menu_icon="cast",
+            default_index=0,
+            orientation="vertical",  # Must be vertical in sidebar
+            styles={
+                "container": {"padding": "5!important", "background-color": "#3a6acb"},
+                "icon": {"color": "white", "font-size": "20px"},
+                "nav-link": {
+                    "font-size": "16px",
+                    "text-align": "left",
+                    "margin": "5px",
+                    "--hover-color": "#586db3",
+                },
+                "nav-link-selected": {"background-color": "#0b1355"},
+            }
+        )
+
+        if selected == "Sign In":
             show_login()
-        elif menu == "Sign Up":
+        elif selected == "Sign Up":
             show_signup()
 
 if __name__ == "__main__":
