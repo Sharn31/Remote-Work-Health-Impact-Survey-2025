@@ -1,10 +1,16 @@
 import streamlit as st 
 import sqlite3
 from remote_job_health_impact_dashboard import show_dashboard
+from Login_footer import show_footer
+from Dashboard_footer import dashboard_footer
 from streamlit_option_menu import option_menu
+from PIL import Image
+
+
 conn = sqlite3.connect('app_users.db', check_same_thread=False)
 cursor = conn.cursor()
 def create_user_table():
+     
     
     cursor.execute(
         '''CREATE TABLE  IF NOT EXIsTS app_users(
@@ -59,6 +65,7 @@ def show_login():
             st.session_state.logged_in = True
             st.session_state.username = user
             st.success(f"Welcome {user} 🎉")
+            st.rerun() 
         else:
             st.error("Invalid username or password.")
 
@@ -70,46 +77,42 @@ def email_exists(email):
     cursor.execute("SELECT 1 FROM app_users WHERE email=?", (email,))
     return cursor.fetchone() is not None
 
-###Main
+
+
+
 def main():
-    st.set_page_config("Login App",layout="centered")
+    st.markdown("<title>Sign In | Remote Work App</title>", unsafe_allow_html=True)
+    st.set_page_config("Login App", layout="centered")
     create_user_table()
+
     if 'logged_in' not in st.session_state:
         st.session_state.logged_in = False
 
     if st.session_state.logged_in:
-        show_dashboard(st.session_state["username"])#calling dashboard
-
+        show_dashboard(st.session_state["username"])  # Your dashboard function
     else:
-       # menu = st.sidebar.selectbox("🔐Sign up/Login", ["Sign In", "Sign Up"])
         with st.sidebar:
+           # logo = Image.open("logo.webp")  # Replace with your image path
+           # st.image(logo, width=150)
             selected = option_menu(
-            menu_title="Signin / Signup",
-            options=["Sign In", "Sign Up"],
-            icons=["person-plus", "box-arrow-in-right"],  # Bootstrap icons
-            menu_icon="cast",
-            default_index=0,
-            orientation="vertical",  # Must be vertical in sidebar
-            styles={
-                "container": {"padding": "5!important", "background-color": "#3a6acb"},
-                "icon": {"color": "white", "font-size": "20px"},
-                "nav-link": {
-                    "font-size": "16px",
-                    "text-align": "left",
-                    "margin": "5px",
-                    "--hover-color": "#586db3",
-                },
-                "nav-link-selected": {"background-color": "#0b1355"},
-            }
-        )
+                menu_title="Sign In / Sign Up",
+                options=["Sign In", "Sign Up"],
+                icons=["box-arrow-in-right", "person-plus"],
+                default_index=0,
+                orientation="vertical",
+                styles={
+                    "container": {"padding": "5!important", "background-color": "#3a6acb"},
+                    "icon": {"color": "white", "font-size": "20px"},
+                    "nav-link": {"font-size": "16px", "text-align": "left", "margin": "5px", "--hover-color": "#586db3"},
+                    "nav-link-selected": {"background-color": "#0b1355"},
+                }
+            )
 
         if selected == "Sign In":
             show_login()
         elif selected == "Sign Up":
             show_signup()
+        show_footer()  # Only in login/signup pages
 
 if __name__ == "__main__":
     main()
-
-
-    

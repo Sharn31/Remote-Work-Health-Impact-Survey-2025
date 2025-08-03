@@ -4,6 +4,8 @@ import streamlit as st
 import matplotlib.pylab as plt
 import seaborn as sns 
 from streamlit_option_menu import option_menu
+from Dashboard_footer import dashboard_footer
+
 
 import plotly.express as px
 import matplotlib.pyplot as plt 
@@ -11,6 +13,7 @@ def show_dashboard(username):
     st.write(f"Welcome, {username} 👋")
     st.write("You are now logged into the Remote Work Health Impact Dashboard.")
     st.title("🧑‍💻Remote Work Health Impact Survey 2025")
+    st.markdown("<title>Dashboard | Remote Work Health Survey</title>", unsafe_allow_html=True)
 
     # Sidebar buttons
     #st.sidebar.title("🧑‍💻Remote Work Health Impact Survey 2025")
@@ -62,11 +65,16 @@ def show_dashboard(username):
     with st.sidebar:
             selected = option_menu( 
                 menu_title = "Remote Work Health Impact Survey 2025",
-                options=["Description","Overview","Analyzing the Dataset" ,"Visualizations","Feedback / Query Form"],
-                icons=["book", "bar-chart", "lightbulb", "graph-up-arrow","chat-dots"],
+                options=["Description",
+                         "Overview",
+                         "Analyzing the Dataset" 
+                         ,"Visualizations",
+                         "Feedback / Query Form",
+                         "Log Out"],
+                icons=["book", "bar-chart", "lightbulb", "graph-up-arrow","chat-dots","box-arrow-right"],
                 menu_icon="cast",
                 default_index=0,
-                orientation="horizontal",
+                orientation="vertical",
                 styles={
                 "container": {"padding": "5!important", "background-color": "#3a6acb"},
                 "icon": {"color": "white", "font-size": "20px"},
@@ -685,8 +693,10 @@ def show_dashboard(username):
                     )
         conn.commit()
     
+    
+    
 
-
+    
 
         ###Streamlit UI
         
@@ -719,5 +729,16 @@ def show_dashboard(username):
             else:
                 st.info("No feedback submitted yet.")
         
-        
-            
+    elif selected =="Log Out": 
+        st.session_state.logged_in = False
+        st.session_state.username = ""
+        st.rerun()  # This reloads the app and redirects to SignIn/SignUp
+
+
+
+    dashboard_footer()
+
+
+
+
+
