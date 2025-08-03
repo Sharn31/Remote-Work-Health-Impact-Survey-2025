@@ -422,7 +422,7 @@ def show_dashboard(username):
         y='Count',
         color='Burnout_Level',
         markers=True,
-        title='Grouped Line Chart: Job Role vs Burnout Level'
+        title=' Job Role vs Burnout Level'
         )
 
         fig.update_layout(
@@ -502,7 +502,7 @@ def show_dashboard(username):
         fig.update_layout(
         xaxis_title="Region",
         yaxis_title="Number of Respondents",
-        title_x=0.5,
+        title_x=0.3,
         template="plotly_white"
         )
 
@@ -513,13 +513,11 @@ def show_dashboard(username):
         ## 🔍 Insights
         with st.expander("🔍 Hidden Insights from Burnout by Region"):
             
-            st.markdown("""
-        - Mental health issues are spread across all regions, but patterns vary.
-        - Urbanized regions like **South America** and **Europe** report higher cases of **ADHD** and **Stress Disorders**.
-        - **PTSD** appears more frequently in regions with historical conflict or migration (e.g., **Asia** and **Africa**).
-        - **North America** and **Oceania** show a more balanced distribution, possibly due to better awareness and mental health resources.
-        - **Cultural stigma** and **healthcare access** may influence how mental health conditions are reported in different regions.
-    """)
+            st.subheader("🔍 Hidden Insights")
+        st.markdown(
+        "- **PTSD is the most reported issue globally**, indicating widespread trauma impact.\n"
+        "- **Asia shows highest burnout**, Europe has a **balanced spread**, and South America reports **most ADHD cases**."
+                )
 
     #Chart 7
         st.subheader("Physical Health Issues Vs Work Arrangement")
@@ -563,7 +561,7 @@ def show_dashboard(username):
         """)
 
         #Chart 9
-        st.subheader("Distribution of Weekly Hours by Salary Range")
+        
         import seaborn as sns 
         st.subheader("Correlation Heatmap of Numerical Feature")
         # Convert Burnout_Level to numeric if it's categorical
