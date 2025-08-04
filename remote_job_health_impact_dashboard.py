@@ -5,15 +5,20 @@ import matplotlib.pylab as plt
 import seaborn as sns 
 from streamlit_option_menu import option_menu
 from Dashboard_footer import dashboard_footer
-
-
 import plotly.express as px
 import matplotlib.pyplot as plt 
 def show_dashboard(username):
+    st.set_page_config(
+        page_title="Dashboard | Remote Work Health Survey",
+        page_icon="🧑‍💻",
+        layout="centered"
+    )
+    #st.title("🧑‍💻Remote Work Health Impact Survey 2025")
+    #st.markdown("<title>Dashboard | Remote Work Health Survey</title>", unsafe_allow_html=True)
+
     st.write(f"Welcome, {username} 👋")
     st.write("You are now logged into the Remote Work Health Impact Dashboard.")
-    st.title("🧑‍💻Remote Work Health Impact Survey 2025")
-    st.markdown("<title>Dashboard | Remote Work Health Survey</title>", unsafe_allow_html=True)
+    
 
     # Sidebar buttons
     #st.sidebar.title("🧑‍💻Remote Work Health Impact Survey 2025")
@@ -99,7 +104,9 @@ def show_dashboard(username):
     df = load_data()
 
     if selected == "Description":
-        #st.title("Description")  
+         
+        #st.title("Description") 
+         
         st.header("Welcome to the **Remote Work Health Impact 2025 Dashboard**! 🌍💼")
         st.markdown("""
         
@@ -370,6 +377,7 @@ def show_dashboard(username):
 
         st.markdown(insight_text)
         st.markdown(summary)
+        st.markdown("""---""")
 
         ##Chart 2
         st.subheader("🧠 Mental Health Status by Gender")
@@ -394,6 +402,7 @@ def show_dashboard(username):
 
         st.write(f"• Mental health challenges are reported **almost equally** across genders: {gender_1} - {count_1}, {gender_2} - {count_2}.")
         st.write("• This near parity highlights that **mental health struggles are not gender-biased** and affect both males and females at nearly the same rate — indicating a universal need for support and resources.")
+        st.markdown("""---""")
 
         #Chart 3
         st.subheader(" Age vs  Social Isolation Score")
@@ -420,6 +429,7 @@ def show_dashboard(username):
         st.write("• The line chart shows how social isolation scores vary with age.")
         st.write("• Any sudden increases or decreases may indicate **age groups more prone to isolation**.")
         st.write("• This can help organizations focus support programs for the most vulnerable age groups.")
+        st.markdown("""---""")
 
         #Chart 4 
         st.subheader("📈Job Role Vs Burnout Level")
@@ -444,6 +454,7 @@ def show_dashboard(username):
         st.subheader("🔍 Insight")
         st.write("• This chart shows how burnout levels vary across different job roles.")
         st.write("• Helps identify job roles with consistently high burnout trends.")
+        st.markdown("""---""")
 
         # Chart 5
                 
@@ -477,6 +488,7 @@ def show_dashboard(username):
         st.write(f"• Explore how mental health status is distributed within each industry.")
         st.write(f"• Outer ring shows mental health categories nested inside industries.")
         st.write(f"• Use the filters above to explore specific industries or statuses.")
+        st.markdown("""---""")
 
         #Chart 6
         st.subheader("Region Vs Burnout Level")
@@ -526,6 +538,7 @@ def show_dashboard(username):
         "- **PTSD is the most reported issue globally**, indicating widespread trauma impact.\n"
         "- **Asia shows highest burnout**, Europe has a **balanced spread**, and South America reports **most ADHD cases**."
                 )
+        st.markdown("""---""")
 
     #Chart 7
         st.subheader("Physical Health Issues Vs Work Arrangement")
@@ -548,6 +561,7 @@ def show_dashboard(username):
         - **Wrist and Neck Pain** are the least reported across all types, but still relevant for long-term device usage.
         - These patterns highlight the importance of **ergonomic awareness and preventive exercises** for all work modes.
         """)
+        st.markdown("""---""")
 
         #Chart 8
         st.subheader("Work Arrangement Vs Burnout Leve")
@@ -567,6 +581,7 @@ def show_dashboard(username):
 
         📌 These insights suggest that **remote work needs more support mechanisms** (like check-ins and wellness programs), while hybrid setups must ensure consistency and stability.
         """)
+        st.markdown("""---""")
 
         #Chart 9
         
@@ -586,6 +601,8 @@ def show_dashboard(username):
         - ⚠️ **Hours Worked** surprisingly shows very weak correlation → Suggests qualitative stress may be more important.
         - 👥 **Age & Demographics** have negligible impact in this dataset.
         """)
+        st.markdown("""---""")
+
         #Chart 10
         st.subheader("Distribution of Weekly Hours by Salary Range")
         salary_order = [
@@ -634,8 +651,10 @@ def show_dashboard(username):
 
                     """)
 
+        st.markdown("""---""")
 
         #Chart 11
+        st.subheader("Physical Health Issues vs Mental Health Issues")
         grouped = df_exploded.groupby(['Physical_Issue_Split', 'Mental_Health_Status']).size().reset_index(name='Count')
 
         fig = px.scatter(
@@ -675,6 +694,7 @@ def show_dashboard(username):
         **Stress Disorder Mirrors PTSD Physical Symptoms**  
         - Similar patterns for both categories suggest shared physical stress responses.
         """)
+        
     elif  selected == "Feedback / Query Form":
         import sqlite3
         from datetime import datetime

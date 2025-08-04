@@ -4,7 +4,9 @@ from remote_job_health_impact_dashboard import show_dashboard
 from Login_footer import show_footer
 from Dashboard_footer import dashboard_footer
 from streamlit_option_menu import option_menu
-from PIL import Image
+import hashlib
+import re
+st.title("🧑‍💻Remote Work Health Impact Survey 2025")
 
 
 conn = sqlite3.connect('app_users.db', check_same_thread=False)
@@ -20,25 +22,36 @@ def create_user_table():
                 ''')
     conn.commit()
     #conn.close()
+def hash_password(password):
+    return hashlib.sha256(password.encode()).hexdigest()
+
+def is_valid_email(email):
+    # Basic email regex pattern
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return re.match(pattern, email)
+
 
 def add_user(username,email,password):
+    
     sqlite3.connect("app_users.db")
     cursor=conn.cursor()
-    cursor.execute("INSERT INTO app_users (username,email,password)VALUES(?,?,?)",(username,email,password))
+    hashed_pass = hash_password(password)
+    cursor.execute("INSERT INTO app_users (username,email,password)VALUES(?,?,?)",(username,email,hashed_pass))
     
     conn.commit()
     #conn.close()
 
 def login_user(username,password):
     sqlite3.connect("app_users.db")
-    cursor=conn.cursor()   
-    cursor.execute("SELECT * FROM app_users WHERE username=? AND password =?",(username,password))
+    cursor=conn.cursor()  
+    hashed_pass = hash_password(password) 
+    cursor.execute("SELECT * FROM app_users WHERE username=? AND password =?",(username,hashed_pass))
     data=cursor.fetchone()
     #conn.close()
     return data 
 
 def show_signup():
-    st.subheader("Create New Account")
+    st.subheader("🛅Create New Account")
 
     
     new_user = st.text_input("Create Username")
@@ -49,6 +62,8 @@ def show_signup():
             st.warning("Please enter username, email, and password.")
         elif user_exists(new_user):
             st.warning("Username already exists. Please choose a different one.")
+        elif not is_valid_email(new_email):
+            st.warning("Invalid email format. Please enter a valid email.")
         elif email_exists(new_email):
             st.warning("Email already used. Try logging in.")
         else:
@@ -57,10 +72,10 @@ def show_signup():
 
 
 def show_login():
-    st.subheader("Sign In")
+    st.subheader("🔐Sign In")
     user = st.text_input("Username")
     password = st.text_input("Password", type="password")
-    if st.button("Login"):
+    if st.button("🔓Login"):
         if login_user(user, password):
             st.session_state.logged_in = True
             st.session_state.username = user
@@ -81,9 +96,31 @@ def email_exists(email):
 
 
 def main():
-    st.markdown("<title>Sign In | Remote Work App</title>", unsafe_allow_html=True)
+    
+   
     st.set_page_config("Login App", layout="centered")
     create_user_table()
+    # Inject full sidebar styling
+    st.markdown("""
+        <style>
+            [data-testid="stSidebar"] {
+                background-color: #1f3bb3;
+                padding-top: 30px;
+            }
+            [data-testid="stSidebar"] img {
+                display: block;
+                margin-left: auto;
+                margin-right: auto;
+                width: 120px;
+                border-radius: 10px;
+            }
+            [data-testid="stSidebarNav"]::before {
+                content: "";
+                display: block;
+                margin-bottom: 20px;
+            }
+        </style>
+    """, unsafe_allow_html=True)
 
     if 'logged_in' not in st.session_state:
         st.session_state.logged_in = False
@@ -92,19 +129,34 @@ def main():
         show_dashboard(st.session_state["username"])  # Your dashboard function
     else:
         with st.sidebar:
-           # logo = Image.open("logo.webp")  # Replace with your image path
-           # st.image(logo, width=150)
+            st.sidebar.image("logo.png", width=200)
             selected = option_menu(
-                menu_title="Sign In / Sign Up",
+                menu_title="",
                 options=["Sign In", "Sign Up"],
                 icons=["box-arrow-in-right", "person-plus"],
                 default_index=0,
                 orientation="vertical",
                 styles={
-                    "container": {"padding": "5!important", "background-color": "#3a6acb"},
-                    "icon": {"color": "white", "font-size": "20px"},
-                    "nav-link": {"font-size": "16px", "text-align": "left", "margin": "5px", "--hover-color": "#586db3"},
-                    "nav-link-selected": {"background-color": "#0b1355"},
+                    "container": {
+                        "padding": "0px",
+                        "background-color": "#1f3bb3"
+                    },
+                    "icon": {
+                        "color": "white",
+                        "font-size": "20px"
+                    },
+                    "nav-link": {
+                        "font-size": "16px",
+                        "color": "white",
+                        "text-align": "center",
+                        "margin": "5px",
+                        "--hover-color": "#3949ab"
+                    },
+                    "nav-link-selected": {
+                        "background-color": "#061d41",
+                        "font-weight": "bold",
+                        "color": "white"
+                    }
                 }
             )
 
@@ -112,7 +164,7 @@ def main():
             show_login()
         elif selected == "Sign Up":
             show_signup()
-        show_footer()  # Only in login/signup pages
 
+        show_footer()
 if __name__ == "__main__":
     main()
