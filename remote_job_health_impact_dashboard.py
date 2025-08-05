@@ -1,15 +1,16 @@
 import numpy as np
 import pandas as pd 
 import streamlit as st 
-import matplotlib.pylab as plt
+import matplotlib.pyplot as plt
 import seaborn as sns 
 from streamlit_option_menu import option_menu
 from Dashboard_footer import dashboard_footer
 import plotly.express as px
-import matplotlib.pyplot as plt 
+import re
+
 def show_dashboard(username):
     st.set_page_config(
-        page_title="Dashboard | Remote Work Health Survey",
+        page_title="Dashboard | Remote Wellbeing Health Dashboard",
         page_icon="🧑‍💻",
         layout="centered"
     )
@@ -17,59 +18,37 @@ def show_dashboard(username):
     #st.markdown("<title>Dashboard | Remote Work Health Survey</title>", unsafe_allow_html=True)
 
     st.write(f"Welcome, {username} 👋")
-    st.write("You are now logged into the Remote Work Health Impact Dashboard.")
+    st.write("You are now logged into the Remote Wellbeing Health Dashboard.")
     
 
     # Sidebar buttons
     #st.sidebar.title("🧑‍💻Remote Work Health Impact Survey 2025")
     # Inject CSS to color the entire sidebar
-    st.markdown(
-        """
-        <style>
-            /* Sidebar background color */
-            [data-testid="stSidebar"] {
-                background-color: #3a6acb; /* Change this to any HEX or color name */
-            }
-
-            /* Optional: Style the text color inside sidebar */
-            [data-testid="stSidebar"] * {
-                color: white;
-            }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
-    ## Change Colour 
+    
     st.markdown("""
         <style>
-        /* Sidebar background */
-        [data-testid="stSidebar"] {
-            background-color: 	#3a6acb !important;
-        }
-
-        /* All text inside sidebar */
-        [data-testid="stSidebar"] * {
-            color: white !important;
-        }
-
-        /* Main page background */
-        .main {
-            background-color: #121212;  /* Light blue background */
-            padding: 20px;
-            border-radius: 10px;
-        }
-
-        /* Main content text styling */
-        .block-container {
-            color: #FFFFFF; /* Main text color */
-            font-family: 'Poppins', sans-serif;
-        }
-
+            [data-testid="stSidebar"] {
+                background-color: #1f3bb3;
+                padding-top: 30px;
+            }
+            [data-testid="stSidebar"] img {
+                display: block;
+                margin-left: auto;
+                margin-right: auto;
+                width: 120px;
+                border-radius: 10px;
+            }
+            [data-testid="stSidebarNav"]::before {
+                content: "";
+                display: block;
+                margin-bottom: 20px;
+            }
         </style>
     """, unsafe_allow_html=True)
     with st.sidebar:
+            st.sidebar.image("logo (3).png", width=200)
             selected = option_menu( 
-                menu_title = "Remote Work Health Impact Survey 2025",
+                menu_title = "",
                 options=["Description",
                          "Overview",
                          "Analyzing the Dataset" 
@@ -81,16 +60,27 @@ def show_dashboard(username):
                 default_index=0,
                 orientation="vertical",
                 styles={
-                "container": {"padding": "5!important", "background-color": "#3a6acb"},
-                "icon": {"color": "white", "font-size": "20px"},
-                "nav-link": {
-                    "font-size": "16px",
-                    "text-align": "left",
-                    "margin": "5px",
-                    "--hover-color": "#586db3",
-                },
-                "nav-link-selected": {"background-color": "#0b1355"},
-            }
+                    "container": {
+                        "padding": "0px",
+                        "background-color": "#1f3bb3"
+                    },
+                    "icon": {
+                        "color": "white",
+                        "font-size": "20px"
+                    },
+                    "nav-link": {
+                        "font-size": "16px",
+                        "color": "white",
+                        "text-align": "center",
+                        "margin": "5px",
+                        "--hover-color": "#3949ab"
+                    },
+                    "nav-link-selected": {
+                        "background-color": "#061d41",
+                        "font-weight": "bold",
+                        "color": "white"
+                    }
+                }
 
             )
 
@@ -107,7 +97,7 @@ def show_dashboard(username):
          
         #st.title("Description") 
          
-        st.header("Welcome to the **Remote Work Health Impact 2025 Dashboard**! 🌍💼")
+        st.header("Welcome to the **Remote Wellbeing Health Solutions Dashboard**! 🌍💼")
         st.markdown("""
         
 
@@ -276,8 +266,10 @@ def show_dashboard(username):
         st.subheader("🧹 Missing Values Handling")
 
         # Display missing values before
-        st.write("🔍 Missing Values Before Filling:")
-        st.dataframe(df.isnull().sum())
+        st.write("🔍Missing Values Before Filling:")
+        missing = df.isnull().sum().reset_index()
+        missing.columns = ['Column_Name', 'Missing_Values']
+        st.dataframe(missing)
 
         # Fill missing values with mode
         df['Mental_Health_Status'].fillna(df['Mental_Health_Status'].mode()[0], inplace=True)
@@ -288,7 +280,9 @@ def show_dashboard(username):
 
         # Display missing values after
         st.write("✅ Missing Values After Filling:")
-        st.dataframe(df.isnull().sum())
+        missing = df.isnull().sum().reset_index()
+        missing.columns = ['Column_Name', 'Missing_Values']
+        st.dataframe(missing)
 
         
         st.write("🔎 Sample Data After Filling Nulls:")
@@ -726,12 +720,19 @@ def show_dashboard(username):
         feedback_type=st.selectbox("Feedback Type",["Query","Suggestion","Complaint"])
         message=st.text_input("Your Message")
 
+        
         if st.button("Submit"):
             if name and email and message:
-                cursor.execute("INSERT INTO form(name,email,feedback_type,message,submitted_on)VALUES(?,?,?,?,?)",
-                            (name,email,feedback_type, message,datetime.now()))
-                conn.commit()
-                st.success("✅ Thank you! Your feedback has been submitted.")
+                if not re.match(r"^[\w\.-]+@[\w\.-]+\.\w+$", email):
+                    st.warning("⚠️ Please enter a valid email address.")
+                else:
+                    # ✅ Email is valid, insert into DB
+                    cursor.execute(
+                "INSERT INTO form(name, email, feedback_type, message, submitted_on) VALUES (?, ?, ?, ?, ?)",
+                (name, email, feedback_type, message, datetime.now())
+                    )
+                    conn.commit()
+                    st.success("✅ Thank you! Your feedback has been submitted.")
             else:
                 st.warning("⚠️ Please fill all fields before submitting.")
 

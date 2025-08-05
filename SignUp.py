@@ -6,7 +6,7 @@ from Dashboard_footer import dashboard_footer
 from streamlit_option_menu import option_menu
 import hashlib
 import re
-st.title("🧑‍💻Remote Work Health Impact Survey 2025")
+st.title("🧑‍💻Remote Wellbeing Health Solutions")
 
 
 conn = sqlite3.connect('app_users.db', check_same_thread=False)
@@ -129,7 +129,7 @@ def main():
         show_dashboard(st.session_state["username"])  # Your dashboard function
     else:
         with st.sidebar:
-            st.sidebar.image("logo.png", width=200)
+            st.sidebar.image("logo (3).png", width=1000)
             selected = option_menu(
                 menu_title="",
                 options=["Sign In", "Sign Up"],
