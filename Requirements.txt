@@ -1,8 +1,7 @@
 streamlit
-streamlit_option_menu
 pandas
 numpy
 matplotlib
 seaborn
 plotly
-
+streamlit-option-menu
