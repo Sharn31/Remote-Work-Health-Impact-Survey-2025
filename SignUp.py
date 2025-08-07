@@ -6,8 +6,29 @@ from Dashboard_footer import dashboard_footer
 from streamlit_option_menu import option_menu
 import hashlib
 import re
-st.title("🧑‍💻Remote Wellbeing Health Solutions")
+import requests
+import json
+import time
+from streamlit_lottie import st_lottie
 
+st.title("🧑‍💻Remote Wellbeing Health Solutions")
+def load_lottie_url(url: str):
+    r = requests.get(url)
+    if r.status_code != 200:
+        return None
+    return r.json()
+    
+def load_lottie_animation(path):
+    with open(path, "r") as file:
+        return json.load(file)
+
+def splash_screen():
+    if not st.session_state.get("splash_done"):
+        st_lottie(load_lottie_animation("Online Meetings.json"), speed=0.75, loop=True, quality="high")
+        st.markdown("<h3 style='text-align:center;'>Loading Remote Wellbeing Health Solutions...</h3>", unsafe_allow_html=True)
+        time.sleep(2)
+        st.session_state.splash_done = True
+        st.rerun()
 
 conn = sqlite3.connect('app_users.db', check_same_thread=False)
 cursor = conn.cursor()
@@ -15,7 +36,7 @@ def create_user_table():
      
     
     cursor.execute(
-        '''CREATE TABLE  IF NOT EXIsTS app_users(
+        '''CREATE TABLE  IF NOT EXISTS app_users(
         username TEXT PRIMARY KEY,
         email TEXT,
         password TEXT)
@@ -52,37 +73,56 @@ def login_user(username,password):
 
 def show_signup():
     st.subheader("🛅Create New Account")
+    lottie_animation = load_lottie_url("https://assets1.lottiefiles.com/packages/lf20_puciaact.json")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
 
     
-    new_user = st.text_input("Create Username")
-    new_email=st.text_input("Enter your email")
-    new_pass = st.text_input("Create Password", type="password")
-    if st.button("Sign Up"):
-        if not new_user or not new_email or not new_pass:
-            st.warning("Please enter username, email, and password.")
-        elif user_exists(new_user):
-            st.warning("Username already exists. Please choose a different one.")
-        elif not is_valid_email(new_email):
-            st.warning("Invalid email format. Please enter a valid email.")
-        elif email_exists(new_email):
-            st.warning("Email already used. Try logging in.")
+        new_user = st.text_input("Create Username")
+        new_email=st.text_input("Enter your email")
+        new_pass = st.text_input("Create Password", type="password")
+        if st.button("Sign Up"):
+            if not new_user or not new_email or not new_pass:
+                st.warning("Please enter username, email, and password.")
+            elif user_exists(new_user):
+                st.warning("Username already exists. Please choose a different one.")
+            elif not is_valid_email(new_email):
+                st.warning("Invalid email format. Please enter a valid email.")
+            elif email_exists(new_email):
+                st.warning("Email already used. Try logging in.")
+            else:
+                add_user(new_user, new_email, new_pass)
+                st.success("✅ Account created successfully. You can now login.")
+    with col2:
+        if lottie_animation:
+            st_lottie(lottie_animation, height=250, key="signup-animation")
         else:
-            add_user(new_user, new_email, new_pass)
-            st.success("✅ Account created successfully. You can now login.")
+            st.info("Lottie animation failed to load.")
 
 
 def show_login():
     st.subheader("🔐Sign In")
-    user = st.text_input("Username")
-    password = st.text_input("Password", type="password")
-    if st.button("🔓Login"):
-        if login_user(user, password):
-            st.session_state.logged_in = True
-            st.session_state.username = user
-            st.success(f"Welcome {user} 🎉")
-            st.rerun() 
+    lottie_animation = load_lottie_url("https://assets1.lottiefiles.com/packages/lf20_puciaact.json")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        user = st.text_input("Username")
+        password = st.text_input("Password", type="password")
+        if st.button("🔓Login"):
+            if login_user(user, password):
+                st.session_state.logged_in = True
+                st.session_state.username = user
+                st.success(f"Welcome {user} 🎉")
+                st.rerun() 
+            else:
+                st.error("Invalid username or password.")
+    with col2:
+        if lottie_animation:
+            st_lottie(lottie_animation, height=250, key="signup-animation")
         else:
-            st.error("Invalid username or password.")
+            st.info("Lottie animation failed to load.")
 
 def user_exists(username):
     cursor.execute("SELECT 1 FROM app_users WHERE username=?", (username,))
@@ -100,6 +140,19 @@ def main():
    
     st.set_page_config("Login App", layout="centered")
     create_user_table()
+    
+    if "splash_done" not in st.session_state:
+        st.session_state.splash_done = False
+    if "logged_in" not in st.session_state:
+        st.session_state.logged_in = False
+
+    if not st.session_state.splash_done:
+        splash_screen()
+        return
+
+    if st.session_state.logged_in:
+        show_dashboard(st.session_state["username"])
+        return
     # Inject full sidebar styling
     st.markdown("""
         <style>
@@ -129,7 +182,7 @@ def main():
         show_dashboard(st.session_state["username"])  # Your dashboard function
     else:
         with st.sidebar:
-            st.sidebar.image("logo (3).png", width=1000)
+            st.sidebar.image("logo (3).png", width=140)
             selected = option_menu(
                 menu_title="",
                 options=["Sign In", "Sign Up"],

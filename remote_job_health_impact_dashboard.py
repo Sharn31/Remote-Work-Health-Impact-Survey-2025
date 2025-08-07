@@ -7,6 +7,20 @@ from streamlit_option_menu import option_menu
 from Dashboard_footer import dashboard_footer
 import plotly.express as px
 import re
+import requests
+from streamlit_lottie import st_lottie
+import json
+
+def load_lottie_file(filepath: str):
+    with open(filepath, "r") as f:
+        return json.load(f)
+
+def load_lottie_url(url: str):
+    r = requests.get(url)
+    if r.status_code != 200:
+        return None
+    return r.json()
+
 
 def show_dashboard(username):
     st.set_page_config(
@@ -19,6 +33,7 @@ def show_dashboard(username):
 
     st.write(f"Welcome, {username} 👋")
     st.write("You are now logged into the Remote Wellbeing Health Dashboard.")
+    
     
 
     # Sidebar buttons
@@ -46,7 +61,7 @@ def show_dashboard(username):
         </style>
     """, unsafe_allow_html=True)
     with st.sidebar:
-            st.sidebar.image("logo (3).png", width=200)
+            st.sidebar.image("logo (3).png", width=150)
             selected = option_menu( 
                 menu_title = "",
                 options=["Description",
@@ -94,10 +109,9 @@ def show_dashboard(username):
     df = load_data()
 
     if selected == "Description":
-         
-        #st.title("Description") 
-         
         st.header("Welcome to the **Remote Wellbeing Health Solutions Dashboard**! 🌍💼")
+        
+            
         st.markdown("""
         
 
@@ -121,8 +135,7 @@ def show_dashboard(username):
         ### 📂 Dataset Link:
         [🔗 Click here to view the dataset](https://www.kaggle.com/datasets/pratyushpuri/remote-work-health-impact-survey-2025)
         """)
-
-
+        
 
     elif  selected == "Overview":
         st.title("Dataset Overview")
@@ -525,9 +538,8 @@ def show_dashboard(username):
 
 
         ## 🔍 Insights
-        with st.expander("🔍 Hidden Insights from Burnout by Region"):
-            
-            st.subheader("🔍 Hidden Insights")
+        
+        st.subheader("🔍 Hidden Insights")
         st.markdown(
         "- **PTSD is the most reported issue globally**, indicating widespread trauma impact.\n"
         "- **Asia shows highest burnout**, Europe has a **balanced spread**, and South America reports **most ADHD cases**."
@@ -739,16 +751,28 @@ def show_dashboard(username):
 
                 # View feedback section
         with st.expander("🔍 View Submitted Feedback"):
-            cursor.execute("SELECT name, email, feedback_type, message, submitted_on FROM form ORDER BY submitted_on DESC")
-            rows = cursor.fetchall()
-            if rows:
-                for row in rows:
-                    st.write(f"**{row[0]} ({row[2]})** — *{row[1]}*")
-                    st.write(f"> {row[3]}")
+            username = st.session_state.get("username")  # Get current user's username
+
+            if username:
+                cursor.execute("""
+                SELECT name, email, feedback_type, message, submitted_on 
+                FROM form 
+                WHERE name = ? 
+                ORDER BY submitted_on DESC
+                """, (username,))
+                rows = cursor.fetchall()
+
+                if rows:
+                    for row in rows:
+                        st.markdown(f"**Name:** {row[0]}  \n📧 **Email:** {row[1]}")
+                        st.markdown(f"🔹 **Type:** `{row[2]}`")
+                        st.write(f"> 💬 {row[3]}")
                     st.caption(f"🕒 Submitted on {row[4]}")
                     st.markdown("---")
+                else:
+                    st.info("You haven’t submitted any feedback yet.")
             else:
-                st.info("No feedback submitted yet.")
+                st.warning("⚠️ No username found in session. Please log in again.")
         
     elif selected =="Log Out": 
         st.session_state.logged_in = False
