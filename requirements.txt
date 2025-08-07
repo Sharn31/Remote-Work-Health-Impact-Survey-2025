@@ -1,7 +1,9 @@
-streamlit
+streamlit==1.35.0
 pandas
 numpy
+plotly
 matplotlib
 seaborn
-plotly
 streamlit-option-menu
+streamlit-lottie
+requests
