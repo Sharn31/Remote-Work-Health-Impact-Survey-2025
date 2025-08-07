@@ -1,4 +1,5 @@
 import streamlit as st 
+st.set_page_config(page_title="Login App", layout="centered")
 import sqlite3
 from remote_job_health_impact_dashboard import show_dashboard
 from Login_footer import show_footer
@@ -138,7 +139,7 @@ def email_exists(email):
 def main():
     
    
-    st.set_page_config("Login App", layout="centered")
+    #st.set_page_config("Login App", layout="centered")
     create_user_table()
     
     if "splash_done" not in st.session_state:
