@@ -1,6 +1,7 @@
 import streamlit as st 
 st.set_page_config(page_title="Login App", layout="centered")
 import sqlite3
+import os 
 from remote_job_health_impact_dashboard import show_dashboard
 from Login_footer import show_footer
 from Dashboard_footer import dashboard_footer
@@ -33,6 +34,7 @@ def splash_screen():
 
 conn = sqlite3.connect('app_users.db', check_same_thread=False)
 cursor = conn.cursor()
+
 def create_user_table():
      
     
