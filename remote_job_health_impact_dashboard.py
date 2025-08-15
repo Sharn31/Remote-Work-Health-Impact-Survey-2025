@@ -729,7 +729,7 @@ def show_dashboard(username):
         st.subheader("📝 Feedback / Query Form")
         name=st.text_input("Enter Your Name")
         email=st.text_input("Enter your Email")
-        feedback_type=st.selectbox("Feedback Type",["Query","Suggestion","Complaint"])
+        feedback_type=st.selectbox("Feedback Type",["Query","Suggestion","Complaint","Compliment","Other"])
         message=st.text_input("Your Message")
 
         
