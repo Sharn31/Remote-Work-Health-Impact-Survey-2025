@@ -69,8 +69,9 @@ def show_dashboard(username):
                          "Analyzing the Dataset" 
                          ,"Visualizations",
                          "Feedback / Query Form",
+                         "Chat Bot",
                          "Log Out"],
-                icons=["book", "bar-chart", "lightbulb", "graph-up-arrow","chat-dots","box-arrow-right"],
+                icons=["book", "bar-chart", "lightbulb", "graph-up-arrow","chat-dots","bi-chat-dots","box-arrow-right"],
                 menu_icon="cast",
                 default_index=0,
                 orientation="vertical",
@@ -704,8 +705,14 @@ def show_dashboard(username):
     elif  selected == "Feedback / Query Form":
         import sqlite3
         from datetime import datetime
-        conn = sqlite3.connect('form.db',check_same_thread=False) 
+        @st.cache_resource
+        def get_connection():
+            conn = sqlite3.connect("form.db", check_same_thread=False)
+            return conn
+        conn = get_connection()
         cursor = conn.cursor()
+
+        
         
         # Create table
         cursor.execute('''CREATE TABLE IF NOT EXISTS form(
@@ -730,7 +737,7 @@ def show_dashboard(username):
         name=st.text_input("Enter Your Name")
         email=st.text_input("Enter your Email")
         feedback_type=st.selectbox("Feedback Type",["Query","Suggestion","Complaint","Compliment","Other"])
-        message=st.text_input("Your Message")
+        message=st.text_area("Your Message")
 
         
         if st.button("Submit"):
