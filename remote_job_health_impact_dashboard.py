@@ -15,11 +15,11 @@ def load_lottie_file(filepath: str):
     with open(filepath, "r") as f:
         return json.load(f)
 
-def load_lottie_url(url: str):
-    r = requests.get(url)
-    if r.status_code != 200:
-        return None
-    return r.json()
+#def load_lottie_url(url: str):
+    #r = requests.get(url)
+    #if r.status_code != 200:
+    #    return None
+    #return r.json()
 
 
 def show_dashboard(username):
@@ -69,7 +69,6 @@ def show_dashboard(username):
                          "Analyzing the Dataset" 
                          ,"Visualizations",
                          "Feedback / Query Form",
-                         "Chat Bot",
                          "Log Out"],
                 icons=["book", "bar-chart", "lightbulb", "graph-up-arrow","chat-dots","bi-chat-dots","box-arrow-right"],
                 menu_icon="cast",
