@@ -10,6 +10,7 @@ import re
 import requests
 from streamlit_lottie import st_lottie
 import json
+import html
 
 def load_lottie_file(filepath: str):
     with open(filepath, "r") as f:
@@ -23,6 +24,8 @@ def load_lottie_file(filepath: str):
 
 
 def show_dashboard(username):
+    import streamlit as st
+
     st.set_page_config(
         page_title="Dashboard | Remote Wellbeing Health Dashboard",
         page_icon="🧑‍💻",
@@ -43,25 +46,57 @@ def show_dashboard(username):
     st.markdown("""
         <style>
             [data-testid="stSidebar"] {
-                background-color: #1f3bb3;
+                background-color: #667eea;
                 padding-top: 30px;
             }
             [data-testid="stSidebar"] img {
                 display: block;
                 margin-left: auto;
                 margin-right: auto;
-                width: 120px;
-                border-radius: 10px;
+                width: 180px;
+                border-radius: 20px;
+                border: 3px solid rgba(255,255,255,0.3);
+                padding: 10px;
             }
             [data-testid="stSidebarNav"]::before {
                 content: "";
                 display: block;
                 margin-bottom: 20px;
             }
+            .css-1d391kg {
+                background-color: transparent !important;
+            }
+            .css-1lcbmhc {
+                background-color: transparent !important;
+            }
+            div[data-baseweb="select"] {
+                background-color: transparent !important;
+            }
+            .stSelectbox > div > div {
+                background-color: transparent !important;
+            }
+            .stSidebar .css-1d391kg {
+                background-color: transparent !important;
+            }
+            .stSidebar .css-1lcbmhc {
+                background-color: transparent !important;
+            }
+            div[class*="option-menu"] {
+                background-color: transparent !important;
+            }
+            div[class*="OptionMenu"] {
+                background-color: transparent !important;
+            }
+            .stSidebar > div > div {
+                background-color: transparent !important;
+            }
+            [class*="option-menu-container"] {
+                background-color: transparent !important;
+            }
         </style>
     """, unsafe_allow_html=True)
     with st.sidebar:
-            st.sidebar.image("logo (3).png", width=150)
+            st.sidebar.image("logo (3).png", width=180)
             selected = option_menu( 
                 menu_title = "",
                 options=["Description",
@@ -69,6 +104,7 @@ def show_dashboard(username):
                          "Analyzing the Dataset" 
                          ,"Visualizations",
                          "Feedback / Query Form",
+                         "Chatbot",
                          "Log Out"],
                 icons=["book", "bar-chart", "lightbulb", "graph-up-arrow","chat-dots","bi-chat-dots","box-arrow-right"],
                 menu_icon="cast",
@@ -76,22 +112,24 @@ def show_dashboard(username):
                 orientation="vertical",
                 styles={
                     "container": {
-                        "padding": "0px",
-                        "background-color": "#1f3bb3"
+                        "padding": "10px",
+                        "background": "transparent"
                     },
                     "icon": {
                         "color": "white",
-                        "font-size": "20px"
+                        "font-size": "22px",
+                        "margin-right": "10px"
                     },
                     "nav-link": {
                         "font-size": "16px",
                         "color": "white",
-                        "text-align": "center",
-                        "margin": "5px",
-                        "--hover-color": "#3949ab"
+                        "text-align": "left",
+                        "margin": "8px 0",
+                        "padding": "12px 15px",
+                        "border-radius": "10px"
                     },
                     "nav-link-selected": {
-                        "background-color": "#061d41",
+                        "background-color": "rgba(255,255,255,0.2)",
                         "font-weight": "bold",
                         "color": "white"
                     }
@@ -779,6 +817,239 @@ def show_dashboard(username):
                     st.info("You haven’t submitted any feedback yet.")
             else:
                 st.warning("⚠️ No username found in session. Please log in again.")
+    elif selected == "Chatbot":
+        # Add custom CSS for chatbot
+        st.markdown("""
+        <style>
+            .chat-container {
+                max-width: 800px;
+                margin: 0 auto;
+            }
+            .user-message {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 15px 20px;
+                border-radius: 20px 20px 5px 20px;
+                margin: 10px 0;
+                margin-left: 20%;
+                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            }
+            .ai-message {
+                background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+                color: white;
+                padding: 15px 20px;
+                border-radius: 20px 20px 20px 5px;
+                margin: 10px 0;
+                margin-right: 20%;
+                box-shadow: 0 4px 15px rgba(245, 87, 108, 0.3);
+            }
+            .chat-header {
+                text-align: center;
+                padding: 20px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border-radius: 15px;
+                margin-bottom: 30px;
+                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            }
+            .stTextInput > div > div > input {
+                border-radius: 25px;
+                padding: 12px 20px;
+                border: 2px solid #667eea;
+            }
+        </style>
+        """, unsafe_allow_html=True)
+
+        # Initialize chat history
+        if "chat_history" not in st.session_state:
+            st.session_state.chat_history = []
+
+        if "last_message" not in st.session_state:
+            st.session_state.last_message = ""
+
+        # Dataset knowledge base
+        dataset_info = {
+            "columns": {
+                "Survey_Date": "Date of survey submission (YYYY-MM-DD format)",
+                "Age": "Age of the respondent",
+                "Gender": "Gender identity (Female, Male, Non-binary)",
+                "Region": "Geographic region (Asia, Europe, North America, Africa, Oceania, South America)",
+                "Industry": "Industry sector (Technology, Healthcare, Finance, etc.)",
+                "Job_Role": "Specific job title/role (Data Analyst, HR Manager, etc.)",
+                "Work_Arrangement": "Work mode: Remote, Hybrid, or Onsite",
+                "Hours_Per_Week": "Average hours worked per week",
+                "Mental_Health_Status": "Mental health condition (Anxiety, Depression, Burnout, PTSD, Stress Disorder, ADHD, or None)",
+                "Burnout_Level": "Burnout severity: Low, Medium, or High",
+                "Work_Life_Balance_Score": "Work-life balance rating from 1-5 (1=Poor, 5=Excellent)",
+                "Physical_Health_Issues": "Physical complaints (Back Pain, Eye Strain, Neck Pain, Shoulder Pain, Wrist Pain - semicolon separated)",
+                "Social_Isolation_Score": "Social isolation rating from 1-5 (1=Very Isolated, 5=Well Connected)",
+                "Salary_Range": "Annual salary in USD ($40K-60K, $60K-80K, $80K-100K, $100K-120K, $120K+)"
+            },
+            "insights": {
+                "remote_workers": "Remote workers report highest burnout (46.4% High), suggesting need for better work-life boundaries and support systems.",
+                "hybrid_workers": "Hybrid workers show balanced burnout but high Medium burnout (45.1%), indicating stress from environment switching.",
+                "onsite_workers": "Onsite workers have highest Low burnout rate (30.2%), possibly due to structured routines and in-person support.",
+                "physical_health": "Onsite workers report most Eye Strain, Shoulder Pain, and Back Pain. Remote workers have fewer complaints but still face Eye Strain and Back Pain.",
+                "mental_health": "PTSD is the most reported mental health issue globally. Mental health challenges are nearly equal across genders.",
+                "isolation": "Social isolation varies by work arrangement - remote workers tend to have higher isolation scores."
+            }
+        }
+
+        def generate_response(user_message: str) -> str:
+            """Simple rule-based chatbot that understands project context"""
+            msg_lower = user_message.lower().strip()
+            
+            # Greetings
+            if any(word in msg_lower for word in ["hi", "hello", "hey", "greetings"]):
+                return "👋 Hello! I'm your AI assistant for the Remote Work Health Impact Dashboard. I can help you understand:\n\n• Dataset columns and their meanings\n• Key insights from the data\n• Solutions and recommendations\n• Project information\n\nWhat would you like to know?"
+            
+            # Help
+            if any(word in msg_lower for word in ["help", "what can you do", "capabilities"]):
+                return "I can help you with:\n\n📊 **Dataset Information:**\n• Explain all 14 columns in the dataset\n• Describe what each column means\n• Provide examples of values\n\n💡 **Insights & Analysis:**\n• Key findings about remote vs onsite work\n• Mental and physical health patterns\n• Burnout trends by work arrangement\n\n💼 **Solutions & Recommendations:**\n• Suggestions for improving remote work health\n• Strategies to reduce burnout\n• Tips for better work-life balance\n\nJust ask me about columns, insights, or solutions!"
+            
+            # Columns information
+            if any(word in msg_lower for word in ["column", "columns", "dataset", "data", "fields", "variables"]):
+                response = "📊 **Dataset Columns (14 total):**\n\n"
+                for col, desc in dataset_info["columns"].items():
+                    response += f"• **{col}**: {desc}\n"
+                response += "\n💡 Ask me about any specific column for more details!"
+                return response
+            
+            # Specific column queries
+            for col_name, description in dataset_info["columns"].items():
+                if col_name.lower().replace("_", " ") in msg_lower or col_name.lower() in msg_lower:
+                    examples = {
+                        "Work_Arrangement": "Examples: Remote, Hybrid, Onsite",
+                        "Mental_Health_Status": "Examples: Anxiety, Depression, Burnout, PTSD, Stress Disorder, ADHD, None",
+                        "Burnout_Level": "Examples: Low, Medium, High",
+                        "Work_Life_Balance_Score": "Scale: 1 (Poor) to 5 (Excellent)",
+                        "Social_Isolation_Score": "Scale: 1 (Very Isolated) to 5 (Well Connected)",
+                        "Physical_Health_Issues": "Common issues: Back Pain, Eye Strain, Neck Pain, Shoulder Pain, Wrist Pain (can have multiple)"
+                    }
+                    response = f"📋 **{col_name}**\n\n{description}\n"
+                    if col_name in examples:
+                        response += f"\n{examples[col_name]}"
+                    return response
+            
+            # Insights
+            if any(word in msg_lower for word in ["insight", "finding", "trend", "pattern", "analysis"]):
+                response = "💡 **Key Insights from the Data:**\n\n"
+                for key, insight in dataset_info["insights"].items():
+                    response += f"• {insight}\n"
+                return response
+            
+            # Solutions and recommendations
+            if any(word in msg_lower for word in ["solution", "recommendation", "suggest", "advice", "help", "improve", "reduce", "prevent"]):
+                solutions = {
+                    "burnout": "🔥 **To Reduce Burnout:**\n• Set clear work boundaries and stick to regular hours\n• Take regular breaks and practice mindfulness\n• Communicate workload concerns with managers\n• Use time management techniques (Pomodoro, time blocking)\n• Ensure adequate rest and recovery time",
+                    "remote": "🏠 **For Remote Workers:**\n• Create a dedicated workspace with ergonomic setup\n• Schedule virtual coffee breaks with colleagues\n• Join online communities or coworking spaces\n• Set strict start/end times for work\n• Use video calls to maintain social connections",
+                    "physical": "💪 **Physical Health Solutions:**\n• Invest in ergonomic furniture (chair, desk, monitor stand)\n• Follow 20-20-20 rule for eye strain (every 20 min, look 20 feet away for 20 sec)\n• Do regular stretching exercises\n• Take walking breaks throughout the day\n• Consider standing desk or desk exercises",
+                    "mental": "🧠 **Mental Health Support:**\n• Access employee assistance programs (EAP)\n• Practice stress management techniques\n• Maintain social connections outside work\n• Seek professional help when needed\n• Practice work-life balance activities",
+                    "isolation": "👥 **Reduce Social Isolation:**\n• Schedule regular team meetings and check-ins\n• Join virtual team building activities\n• Participate in online professional communities\n• Maintain regular communication with colleagues\n• Consider hybrid work arrangements"
+                }
+                
+                if "burnout" in msg_lower:
+                    return solutions["burnout"]
+                elif "remote" in msg_lower or "work from home" in msg_lower:
+                    return solutions["remote"]
+                elif "physical" in msg_lower or "pain" in msg_lower or "strain" in msg_lower:
+                    return solutions["physical"]
+                elif "mental" in msg_lower or "anxiety" in msg_lower or "depression" in msg_lower:
+                    return solutions["mental"]
+                elif "isolation" in msg_lower or "lonely" in msg_lower or "social" in msg_lower:
+                    return solutions["isolation"]
+                else:
+                    return "💡 **General Recommendations:**\n\n" + "\n\n".join([f"{key.replace('_', ' ').title()}:\n{val}" for key, val in solutions.items()])
+            
+            # Project information
+            if any(word in msg_lower for word in ["project", "about", "what is this", "dashboard", "purpose"]):
+                return """📊 **Remote Work Health Impact Dashboard**
+
+This project analyzes how different work arrangements (Remote 🏠, Hybrid 🔀, Onsite 🏢) affect employee mental and physical health.
+
+**Dataset:** 1,000+ survey responses from June 2025
+**Columns:** 14 features covering demographics, work arrangements, health metrics
+**Purpose:** Help organizations understand work arrangement impacts and improve employee wellbeing
+
+**Key Areas Analyzed:**
+• Mental health (burnout, anxiety, depression, PTSD)
+• Physical health (back pain, eye strain, neck/shoulder issues)
+• Work-life balance scores
+• Social isolation levels
+• Burnout patterns by work arrangement
+
+Ask me about specific columns, insights, or solutions!"""
+            
+            # Default response
+            return "I understand you're asking about: '" + user_message + "'\n\nI can help you with:\n• Dataset columns and their meanings\n• Key insights and findings\n• Solutions and recommendations\n• Project information\n\nTry asking about columns, insights, or solutions! 💡"
+
+        # Chat header
+        st.markdown("""
+        <div class="chat-header">
+            <h1>🤖 Remote Work Health Dashboard Assistant</h1>
+            <p>Ask me about dataset columns, insights, or solutions for remote work health!</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # Display chat history with styled messages
+        chat_container = st.container()
+        with chat_container:
+            if not st.session_state.chat_history:
+                st.info("👋 Hi! I'm your AI assistant. I can help you understand the dataset columns, key insights, and provide solutions. Try asking:\n\n• 'What are the columns?'\n• 'Tell me about Work_Arrangement'\n• 'What are the insights?'\n• 'Suggest solutions for burnout'")
+            else:
+                for chat in st.session_state.chat_history:
+                    # Escape HTML to prevent rendering issues, then convert newlines to <br>
+                    user_msg = html.escape(str(chat['user']))
+                    ai_msg = html.escape(str(chat['ai'])).replace('\n', '<br>')
+                    
+                    # User message
+                    st.markdown(f"""
+                    <div class="user-message">
+                        <strong>👤 You:</strong><br>
+                        {user_msg}
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                    # AI message
+                    st.markdown(f"""
+                    <div class="ai-message">
+                        <strong>🤖 AI Assistant:</strong><br>
+                        {ai_msg}
+                    </div>
+                    """, unsafe_allow_html=True)
+
+        # Input area using form to handle input clearing
+        with st.form(key="chat_form", clear_on_submit=True):
+            col1, col2 = st.columns([5, 1])
+            with col1:
+                user_input = st.text_input(
+                    "Type your message:",
+                    placeholder="Ask about columns, insights, or solutions...",
+                    label_visibility="collapsed"
+                )
+            with col2:
+                send_button = st.form_submit_button("Send 💬", use_container_width=True, type="primary")
+
+            # Handle form submission
+            if send_button:
+                if user_input and user_input.strip() and user_input != st.session_state.get("last_message", ""):
+                    st.session_state.last_message = user_input
+                    ai_response = generate_response(user_input)
+                    st.session_state.chat_history.append({
+                        "user": user_input,
+                        "ai": ai_response
+                    })
+                    st.rerun()
+                elif not user_input or not user_input.strip():
+                    st.warning("Please enter a message before sending.")
+
+        # Clear chat button (outside form)
+        if st.session_state.chat_history:
+            if st.button("🗑️ Clear Chat History", use_container_width=True):
+                st.session_state.chat_history = []
+                st.session_state.last_message = ""
+                st.rerun()
+
         
     elif selected =="Log Out": 
         st.session_state.logged_in = False

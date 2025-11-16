@@ -13,7 +13,7 @@ import json
 import time
 from streamlit_lottie import st_lottie
 
-st.title("🧑‍💻Remote Wellbeing Health Solutions")
+#st.title("🧑‍💻Remote Wellbeing Health Solutions")
 def load_lottie_url(url: str):
     r = requests.get(url)
     if r.status_code != 200:
@@ -156,24 +156,56 @@ def main():
     if st.session_state.logged_in:
         show_dashboard(st.session_state["username"])
         return
-    # Inject full sidebar styling
+    # Inject full sidebar styling - matching dashboard
     st.markdown("""
         <style>
             [data-testid="stSidebar"] {
-                background-color: #1f3bb3;
+                background-color: #667eea;
                 padding-top: 30px;
             }
             [data-testid="stSidebar"] img {
                 display: block;
                 margin-left: auto;
                 margin-right: auto;
-                width: 120px;
-                border-radius: 10px;
+                width: 180px;
+                border-radius: 20px;
+                border: 3px solid rgba(255,255,255,0.3);
+                padding: 10px;
             }
             [data-testid="stSidebarNav"]::before {
                 content: "";
                 display: block;
                 margin-bottom: 20px;
+            }
+            .css-1d391kg {
+                background-color: transparent !important;
+            }
+            .css-1lcbmhc {
+                background-color: transparent !important;
+            }
+            div[data-baseweb="select"] {
+                background-color: transparent !important;
+            }
+            .stSelectbox > div > div {
+                background-color: transparent !important;
+            }
+            .stSidebar .css-1d391kg {
+                background-color: transparent !important;
+            }
+            .stSidebar .css-1lcbmhc {
+                background-color: transparent !important;
+            }
+            div[class*="option-menu"] {
+                background-color: transparent !important;
+            }
+            div[class*="OptionMenu"] {
+                background-color: transparent !important;
+            }
+            .stSidebar > div > div {
+                background-color: transparent !important;
+            }
+            [class*="option-menu-container"] {
+                background-color: transparent !important;
             }
         </style>
     """, unsafe_allow_html=True)
@@ -185,7 +217,7 @@ def main():
         show_dashboard(st.session_state["username"])  # Your dashboard function
     else:
         with st.sidebar:
-            st.sidebar.image("logo (3).png", width=140)
+            st.sidebar.image("logo (3).png", width=180)
             selected = option_menu(
                 menu_title="",
                 options=["Sign In", "Sign Up"],
@@ -194,22 +226,24 @@ def main():
                 orientation="vertical",
                 styles={
                     "container": {
-                        "padding": "0px",
-                        "background-color": "#1f3bb3"
+                        "padding": "10px",
+                        "background": "transparent"
                     },
                     "icon": {
                         "color": "white",
-                        "font-size": "20px"
+                        "font-size": "22px",
+                        "margin-right": "10px"
                     },
                     "nav-link": {
                         "font-size": "16px",
                         "color": "white",
-                        "text-align": "center",
-                        "margin": "5px",
-                        "--hover-color": "#3949ab"
+                        "text-align": "left",
+                        "margin": "8px 0",
+                        "padding": "12px 15px",
+                        "border-radius": "10px"
                     },
                     "nav-link-selected": {
-                        "background-color": "#061d41",
+                        "background-color": "rgba(255,255,255,0.2)",
                         "font-weight": "bold",
                         "color": "white"
                     }
